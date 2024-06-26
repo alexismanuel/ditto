@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+echo "Running pre-commit hook ..."
+
+# Launch lint
+lint_output=$(./scripts/lint.sh)
+lint_exit_code=$?
+
+if [ $lint_exit_code -eq 0 ]
+then
+  echo "Lint - SUCCESS"
+else
+  echo "Lint - FAIL: Check pylint output to see what's wrong below:"
+  echo "$lint_output"
+  exit $lint_exit_code
+fi
+
+# Launch type check
+type_check_output=$(./scripts/type-check.sh)
+type_check_exit_code=$?
+
+if [ $type_check_exit_code -eq 0 ]
+then
+  echo "Type Check - SUCCESS"
+else
+  echo "Type Check - FAIL: Check mypy output to see what's wrong:"
+  echo "$type_check_output"
+  exit $type_check_exit_code
+fi
+
+# Launch format check
+format_outpout=$(./scripts/format.sh)
+format_exit_code=$?
+
+if [ $format_exit_code -eq 0 ]
+then
+  echo "Format - SUCCESS"
+else
+  echo "Format - FAIL: Check yapf output to see what's wrong:"
+  echo "$format_outpout"
+  exit $format_exit_code
+fi
