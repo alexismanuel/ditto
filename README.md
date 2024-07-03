@@ -1,15 +1,22 @@
-# ditto
-dependency injection tool
+# ditto: dependency injection tool
 
-## First Setup
-```bash
-    ln -sf ${PWD}/.githooks/* ${PWD}/.git/hooks/
+ditto is a simple and lightweight dependency injection tool for Python.
+
+## Installation
+
+```sh
+pip install ditto
 ```
-## Install
-```bash
-  poetry install
-```
-## Run
-```bash
-  poetry run python -m ditto
+
+## Usage
+```python
+from ditto.core import ServiceRegistry
+
+registry = ServiceRegistry.get_instance()
+
+class Service:
+    pass
+
+registry.register('service', Service)
+service = registry.get('service')
 ```
