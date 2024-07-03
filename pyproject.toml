@@ -3,8 +3,9 @@ name = "ditto"
 version = "0.1.0"
 description = ""
 authors = ["Alexis Manuel <alexis.manuelpro@gmail.com>"]
+license = "MIT"
 readme = "README.md"
-package-mode = false
+packages = [{include = "ditto"}]
 
 
 [tool.poetry.dependencies]
@@ -15,3 +16,7 @@ python = "^3.6"
 mock = "^5.0.2"
 pytest = "^7.3.1"
 freezegun = "^1.2.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
