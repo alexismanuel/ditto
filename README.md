@@ -5,7 +5,7 @@ ditto is a simple and lightweight dependency injection tool for Python.
 ## Installation
 
 ```sh
-pip install ditto
+pip install pyditto
 ```
 
 ## Usage

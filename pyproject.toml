@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ditto"
+name = "pyditto"
 version = "0.1.0"
 description = ""
 authors = ["Alexis Manuel <alexis.manuelpro@gmail.com>"]
