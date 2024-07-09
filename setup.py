@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ditto',
-    version='0.1.0',
+    version='0.1.2',
     packages=find_packages(),
     install_requires=[],
     url='https://github.com/alexismanuel/ditto',
@@ -17,5 +17,5 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
     ],
-    python_requires='>=3.7',
+    python_requires='>=3.8',
 )
