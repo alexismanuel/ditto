@@ -1,6 +1,6 @@
 import pytest
-from ditto import ServiceRegistry, register, inject
-
+from typing import Optional
+from ditto import ServiceRegistry, register, inject, is_optional, get_base_type
 
 class Meta:
     def greet(self) -> str:
@@ -31,10 +31,7 @@ class AsyncService:
 def registry() -> ServiceRegistry:
     return ServiceRegistry()
 
-
 class TestServiceRegistry:
-
-
     def test_register_and_get_service(self, registry: ServiceRegistry):
         registry.register(Service, Service)
         service = registry.get('service')
@@ -50,10 +47,7 @@ class TestServiceRegistry:
         with pytest.raises(ValueError, match="Service 'nonexistent' not found."):
             registry.get('nonexistent')
 
-
 class TestRegister:
-
-
     def test_register_service_class(self):
         register(Service)
         service = ServiceRegistry.get_instance().get('service')
@@ -70,9 +64,7 @@ class TestRegister:
         service = ServiceRegistry.get_instance().get('meta')
         assert isinstance(service, Service)
 
-@pytest.mark.asyncio
 class TestInject:
-
     @inject
     def greet_service(self, service: Meta) -> str:
         return service.greet()
@@ -88,6 +80,18 @@ class TestInject:
     @inject
     async def async_greet_service(self, service: AsyncService) -> str:
         return await service.greet()
+
+    @inject
+    def greet_nullable_service(self, service: Optional[AnotherService] = None) -> str:
+        return service.greet() if service else "No service"
+    
+    @inject
+    def function_with_unannotated_service(self, service):
+        return service.greet()
+    
+    @inject
+    def function_with_unannotated_service_and_default(self, service=None):
+        return service
 
     def test_inject_with_registered_service(self):
         register(Service)
@@ -109,10 +113,52 @@ class TestInject:
 
     def test_inject_service_not_found(self):
         ServiceRegistry.instance = None
-        with pytest.raises(ValueError, match="Service 'meta' not found."):
+        with pytest.raises(ValueError, match="Required service 'meta' not found."):
             self.greet_service()
     
+    @pytest.mark.asyncio
     async def test_inject_async_service(self):
         register(AsyncService)
         res = await self.async_greet_service()
         assert res == 'async'
+
+    def test_inject_nullable_service_when_registered(self):
+        register(AnotherService)
+        res = self.greet_nullable_service()
+        assert res == 'world'
+
+    def test_inject_nullable_service_when_not_registered(self):
+        ServiceRegistry.instance = None
+        res = self.greet_nullable_service()
+        assert res == 'No service'
+
+    def test_inject_nullable_service_with_explicit_none(self):
+        register(AnotherService)
+        res = self.greet_nullable_service(service=None)
+        assert res == 'No service'
+    
+    def test_inject_with_unannotated_service(self):
+        with pytest.raises(ValueError, match="Missing type annotation for parameter 'service'"):
+            self.function_with_unannotated_service()
+    
+    def test_inject_with_unannotated_param_and_default(self):
+        result = self.function_with_unannotated_service_and_default()
+        assert result is None
+
+class TestUtilityFunctions:
+    def test_is_optional(self):
+        assert is_optional(Optional[int])
+        assert is_optional(Optional[Service])
+        assert not is_optional(int)
+        assert not is_optional(Service)
+
+    def test_get_base_type(self):
+        assert get_base_type(Optional[int]) == int
+        assert get_base_type(Optional[Service]) == Service
+        assert get_base_type(int) == int
+        assert get_base_type(Service) == Service
+
+@pytest.fixture(autouse=True)
+def clear_registry():
+    yield
+    ServiceRegistry.instance = None
